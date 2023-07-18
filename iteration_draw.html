@@ -8,6 +8,14 @@
             border: 2px solid #000;
             border-radius: 20px;
         }
+         button{
+            background-color: #000;
+            color:#fff;
+            font-size: 16px;
+            border-radius: 50px;
+            font-weight: 700;
+            padding:1rem 1.5rem;
+         }
     </style>
 </head>
 
@@ -15,10 +23,13 @@
     <h1>費波那契數列Fibonacci Number</h1>
     <input id="inputNum" type="number" placeholder="輸入數字" min="0">
     <button onclick="startAnimation()">開始(start)</button>
+    <br/>
     <input id="speedSlider" type="range" min="500" max="5000" value="1000"/>
     <label for="speedSlider">調整速度(speed)</label>
     <input id="angleSlider" type="range" min="3" max="9" value="6"/>
     <label for="angleSlider">調整角度(angle)</label>
+    <input id="ratioSlider" type="range" min="0.1" max="2" value="0.6" step="0.1"/>
+    <label for="ratioSlider">節點間樹枝倍率(branching ratio between nodes)</label>
     <div id="order"></div>
     <div id="arr"></div>
     <div id="cal"></div>
@@ -38,16 +49,17 @@
 
         function drawFibonacciTree(canvas, n) {
             const angleInput = document.getElementById("angleSlider").value;
+            const ratiooInput = document.getElementById("ratioSlider").value;
             const ctx = canvas.getContext("2d");
             const width = canvas.width;
             const height = canvas.height;
-            const initialLength = height / 3;
-            const angle = -Math.PI / 2;
-            const rootX = width / 2;
-            const rootY = height;
+            const initialLength = height/3;
+            const angle = Math.PI / 2;
+            const rootX = 0;
+            const rootY = height/2;
 
             ctx.clearRect(0, 0, width, height);
-            ctx.font = "12px Arial";
+            ctx.font = "14px Arial";
 
             drawBranch(rootX, rootY, initialLength, angle, n);
 
@@ -56,10 +68,10 @@
                     return;
                 }
 
-                const endX = x + length * Math.cos(angle);
-                const endY = y + length * Math.sin(angle);
+                const endX = x + length * Math.sin(angle);
+                const endY = y + length * Math.cos(angle);
 
-                const newLength = length * 0.7;
+                const newLength = length * ratiooInput;
 
                 drawBranch(endX, endY, newLength, angle + Math.PI / angleInput, depth - 1);
                 drawBranch(endX, endY, newLength, angle - Math.PI / angleInput, depth - 1);
@@ -74,7 +86,7 @@
 
                 ctx.fillStyle = "gray";
                 ctx.beginPath();
-                ctx.arc(endX, endY, 10, 0, Math.PI * 2);
+                ctx.arc(endX, endY, 18, 0, Math.PI * 2);
                 ctx.fill();
 
                 ctx.fillStyle = "white";
