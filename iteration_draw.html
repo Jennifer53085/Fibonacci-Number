@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Fibonacci Tree Visualization with Animation</title>
+    <style>
+        canvas {
+            border: 2px solid #000;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>費波那契數列Fibonacci Number</h1>
+    <input id="inputNum" type="number" placeholder="輸入數字" min="0">
+    <button onclick="startAnimation()">開始(start)</button>
+    <input id="speedSlider" type="range" min="500" max="5000" value="1000"/>
+    <label for="speedSlider">調整速度(speed)</label>
+    <input id="angleSlider" type="range" min="3" max="9" value="6"/>
+    <label for="angleSlider">調整角度(angle)</label>
+    <div id="order"></div>
+    <div id="arr"></div>
+    <div id="cal"></div>
+    <div id="num"></div>
+    <br />
+    <canvas id="fibCanvas" width="1000" height="600"></canvas>
+
+    <script>
+        let isAnimating = false;
+        let animationFrame;
+        const arrDiv = document.getElementById("arr");
+        const calDiv = document.getElementById("cal");
+        const orderDiv = document.getElementById("order");
+        const numDiv = document.getElementById("num");
+
+
+
+        function drawFibonacciTree(canvas, n) {
+            const angleInput = document.getElementById("angleSlider").value;
+            const ctx = canvas.getContext("2d");
+            const width = canvas.width;
+            const height = canvas.height;
+            const initialLength = height / 3;
+            const angle = -Math.PI / 2;
+            const rootX = width / 2;
+            const rootY = height;
+
+            ctx.clearRect(0, 0, width, height);
+            ctx.font = "12px Arial";
+
+            drawBranch(rootX, rootY, initialLength, angle, n);
+
+            function drawBranch(x, y, length, angle, depth) {
+                if (depth === 0) {
+                    return;
+                }
+
+                const endX = x + length * Math.cos(angle);
+                const endY = y + length * Math.sin(angle);
+
+                const newLength = length * 0.7;
+
+                drawBranch(endX, endY, newLength, angle + Math.PI / angleInput, depth - 1);
+                drawBranch(endX, endY, newLength, angle - Math.PI / angleInput, depth - 1);
+
+                const fibValue = fibonacci(depth);
+
+                ctx.strokeStyle = "black";
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+                ctx.lineTo(endX, endY);
+                ctx.stroke();
+
+                ctx.fillStyle = "gray";
+                ctx.beginPath();
+                ctx.arc(endX, endY, 10, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = "white";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(fibValue, endX, endY);
+            }
+
+            function fibonacci(n) {
+                let arr = [];
+                orderDiv.innerText = "第1次";
+
+                if (n <= 1) {
+                   
+                    return n;
+                }
+
+                let prev = 0;
+                let curr = 1;
+                arr.push(curr);
+
+                for (let i = 2; i <= n; i++) {
+
+                    calDiv.innerText = `sum=${prev}+${curr}`;
+
+                    const next = prev + curr;
+                    prev = curr;
+                    curr = next;
+                    arr.push(curr);
+
+
+                    arrDiv.innerText = `${arr} `;
+                    orderDiv.innerText = `第${i}次 `;
+                }
+
+
+                return curr;
+            }
+
+
+
+
+            numDiv.innerText = `last number: ${fibonacci(n)} `;
+        }
+
+        function startAnimation() {
+            const inputNum = document.getElementById("inputNum").value;
+
+            const n = parseInt(inputNum);
+
+            calDiv.innerText = ``;
+            arrDiv.innerText = `${[]}`;
+
+            if (isNaN(n) || n < 0) {
+                alert("請輸入0以上的數字")
+                return;
+            } else if (n > 20) { alert("請注意>20之後跑速會變慢"); }
+
+
+
+            if (isAnimating) {
+                return;
+            }
+
+            const canvas = document.getElementById("fibCanvas");
+            let currentDepth = 0;
+
+            isAnimating = true;
+
+
+
+
+            function animate() {
+                const speed = document.getElementById("speedSlider").value;
+                drawFibonacciTree(canvas, currentDepth);
+                currentDepth++;
+
+                if (currentDepth <= n) {
+                    animationTimeout = setTimeout(animate, speed); // 每隔2秒繪製一個節點
+                } else {
+                    isAnimating = false;
+                }
+            }
+
+            animate();
+        }
+
+
+    </script>
+</body>
+
+</html>
