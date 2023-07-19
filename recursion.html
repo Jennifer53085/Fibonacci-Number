@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Fibonacci Sequence Visualization with Animation-recursion</title>
+    <style>
+        canvas {
+            background-color: #555555;
+            border: 2px solid #555555;
+            border-radius: 20px;
+        }
+
+        input#speedSlider {
+            accent-color: #000
+        }
+
+        button {
+            background-color: #000;
+            color: #fff;
+            font-size: 16px;
+            border-radius: 50px;
+            font-weight: 700;
+            padding: .5rem 1.5rem;
+        }
+
+        #color {
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            margin-left: 1rem;
+
+            font-weight: 900;
+            font-size: 1.2rem;
+        }
+
+        #color div {
+            padding: 10px;
+            width: 40px;
+            height: 30px;
+            border-radius: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-left: 1rem;
+            color: #fff;
+        }
+
+        #color div:nth-child(1) {
+            background-color: #3c9794;
+        }
+
+        #color div:nth-child(2) {
+            background-color: #4ba02a;
+        }
+
+        #color div:nth-child(3) {
+            background-color: #FFD000;
+        }
+
+        #color div:nth-child(4) {
+            background-color: #FF6670;
+        }
+
+        #color div:nth-child(5) {
+            background-color: #76797c;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>費氏數列遞迴版Fibonacci Sequence Recursion</h1>
+    <input id="inputNum" type="number" placeholder="輸入數字" min="0">
+    <button onclick="startAnimation()">開始(start)</button>
+    <input id="speedSlider" type="range" min="0" max="5000" value="1000" />
+    <label for="speedSlider">調整速度(speed)</label>
+    <div id="order"></div>
+    <div id="pro"></div>
+    <div id="arr"></div>
+    <div id="color">分層顏色
+        <div>1</div>
+        <div>2</div>
+        <div>3</div>
+        <div>4</div>
+        <div>5</div>
+    </div>
+    <br />
+    <canvas id="canvas" width="1000" height="600"></canvas>
+
+    <script>
+        let isAnimating = false;
+        let animationTimeout;
+        const arrDiv = document.getElementById("arr");
+        const orderDiv = document.getElementById("order");
+        const proDiv = document.getElementById("pro");
+        const speedSlider = document.getElementById("speedSlider");
+
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+
+        // 設定不同層的顏色(4種色系)
+        function colorful(n) {
+            switch (n % 5) {
+                case 1:
+                    return "#3c9794";
+                case 2:
+                    return "#4ba02a";
+                case 3:
+                    return "#FFD000";
+                case 4:
+                    return "#FF6670";
+                default: return "#76797c"
+
+            }
+        }
+
+        // 遞迴繪製樹狀圖
+        async function drawTree(n, x, y, level, arr) {
+            if (level === 0) {
+                return;
+            }
+
+            let text = arr[level] || 0;
+
+
+            context.fillStyle = colorful(level); // 保持原有顏色
+            context.beginPath();
+            context.arc(x, y, 20, 0, Math.PI * 2);
+            context.fill();
+
+            // 繪製文字
+            context.font = "20px Arial";
+            context.fillStyle = "white";
+            context.textAlign = "center";
+            context.textBaseline = "middle";
+            context.fillText(text, x, y);
+
+
+
+            if (level > 1) {
+                // 計算下一層節點的位置
+                const offsetX = 45;
+                const offsetY = 60;
+                const newX1 = x - offsetX; // 左邊
+                const newX2 = x + offsetX; // 右邊
+                const newY = y + offsetY;
+
+                // 繪製左子樹
+                drawTree(n, newX1, newY, level - 1, arr);
+
+                // 繪製右子樹
+                drawTree(n, newX2, newY, level - 2, arr);
+
+                // // 先繪製左連接線
+                // context.beginPath();
+                // context.moveTo(x, y + 15);
+                // context.lineTo(newX1, newY - 15);
+                // context.stroke();
+
+                // // 右
+                // context.beginPath();
+                // context.moveTo(x, y + 15);
+                // context.lineTo(newX2, newY - 15);
+                // context.stroke();
+            }
+        }
+
+        // 非同步延遲函式
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // 遞迴計算費波那契數列
+        async function fibonacci(n, arr) {
+            
+
+            if (n <= 0) {
+                return 0;
+            } else if (n === 1) {
+
+                arrDiv.innerText = arr.slice(1, n + 1).join(", ");
+                orderDiv.innerText += `||--第 ${n} 項`;
+
+                // 繪製樹狀圖
+                await drawTree(n, canvas.width / 2, 50, n, arr);
+                return 1;
+            } else {
+                // 等待一段時間再進行繪製節點
+                await sleep(speedSlider.value);
+                const prev = await fibonacci(n - 1, arr);
+                const curr = await fibonacci(n - 2, arr);
+                proDiv.innerText=`prev(n-1):${prev}、curr(n-2):${curr}`;
+                orderDiv.innerText += `--第 ${n} 項`;
+                arr[n] = prev + curr;
+
+                // 更新畫面
+                arrDiv.innerText = arr.slice(1, n + 1).join(", ");
+                
+                // 繪製樹狀圖
+                await drawTree(n, canvas.width / 2, 50, n, arr);
+
+
+                return arr[n];
+            }
+        }
+
+        async function startAnimation() {
+
+            const inputNum = document.getElementById("inputNum").value;
+            const n = parseInt(inputNum);
+
+            if (isNaN(n) || n < 0) {
+                alert("請輸入大於等於 0 的數字");
+                return;
+            }
+
+
+
+            if (isAnimating) {
+                return;
+            }
+
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            isAnimating = true;
+            arrDiv.innerText = "";
+            orderDiv.innerText = "";
+            proDiv.innerText = "";
+
+            const fibArr = await fibonacci(n, [0, 1]);
+
+            isAnimating = false;
+        }
+    </script>
+</body>
+
+</html>
