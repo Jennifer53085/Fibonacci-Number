@@ -171,25 +171,27 @@
 
         // 遞迴計算費波那契數列
         async function fibonacci(n, arr) {
-            
+             // 等待一段時間再進行繪製節點
+             await sleep(speedSlider.value);
 
             if (n <= 0) {
+                orderDiv.innerText += `||n = ${n}`;
                 return 0;
             } else if (n === 1) {
 
                 arrDiv.innerText = arr.slice(1, n + 1).join(", ");
-                orderDiv.innerText += `||--第 ${n} 項`;
+                orderDiv.innerText += `||n = ${n}`;
 
                 // 繪製樹狀圖
                 await drawTree(n, canvas.width / 2, 50, n, arr);
                 return 1;
             } else {
-                // 等待一段時間再進行繪製節點
-                await sleep(speedSlider.value);
+               
                 const prev = await fibonacci(n - 1, arr);
                 const curr = await fibonacci(n - 2, arr);
-                proDiv.innerText=`prev(n-1):${prev}、curr(n-2):${curr}`;
-                orderDiv.innerText += `--第 ${n} 項`;
+                // const prev = 0;
+                proDiv.innerText+=`||(n-1)prev:${prev}、(n-2)curr:${curr}`;
+                orderDiv.innerText += `--n = ${n}`;
                 arr[n] = prev + curr;
 
                 // 更新畫面
