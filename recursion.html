@@ -190,7 +190,7 @@
                
                 const prev = await fibonacci(n - 1, arr);
                 const curr = await fibonacci(n - 2, arr);
-               
+                // const prev = 0;
                 proDiv.innerText+=`||(n-1)prev:${prev}+(n-2)curr:${curr}`;
                 orderDiv.innerText += `--n = ${n}`;
                 arr[n] = prev + curr;
