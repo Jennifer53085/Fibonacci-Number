@@ -71,8 +71,9 @@
     <h1>費氏數列遞迴版Fibonacci Sequence Recursion</h1>
     <input id="inputNum" type="number" placeholder="輸入數字" min="0">
     <button onclick="startAnimation()">開始(start)</button>
-    <input id="speedSlider" type="range" min="0" max="5000" value="1000" />
-    <label for="speedSlider">調整速度(speed)</label>
+    <label for="speedSlider">調整速度(speed):每</label>
+    <input id="speedSlider" type="number" min="0" max="5" value="0.5" step="0.5"/>
+    <label for="speedSlider">秒顯示一次遞迴結果</label>
     <div id="order"></div>
     <div id="pro"></div>
     <div id="arr"></div>
@@ -172,7 +173,7 @@
         // 遞迴計算費波那契數列
         async function fibonacci(n, arr) {
              // 等待一段時間再進行繪製節點
-             await sleep(speedSlider.value);
+             await sleep(speedSlider.value*1000);
 
             if (n <= 0) {
                 orderDiv.innerText += `||n = ${n}`;
@@ -189,8 +190,8 @@
                
                 const prev = await fibonacci(n - 1, arr);
                 const curr = await fibonacci(n - 2, arr);
-                // const prev = 0;
-                proDiv.innerText+=`||(n-1)prev:${prev}、(n-2)curr:${curr}`;
+               
+                proDiv.innerText+=`||(n-1)prev:${prev}+(n-2)curr:${curr}`;
                 orderDiv.innerText += `--n = ${n}`;
                 arr[n] = prev + curr;
 
