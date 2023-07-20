@@ -72,7 +72,7 @@
     <input id="inputNum" type="number" placeholder="輸入數字" min="0">
     <button onclick="startAnimation()">開始(start)</button>
     <label for="speedSlider">調整速度(speed):每</label>
-    <input id="speedSlider" type="number" min="0" max="5" value="0.5" step="0.5"/>
+    <input id="speedSlider" type="number" min="0" max="5" value="0.5" step="0.5" />
     <label for="speedSlider">秒顯示一次遞迴結果</label>
     <div id="order"></div>
     <div id="pro"></div>
@@ -85,7 +85,7 @@
         <div>5</div>
     </div>
     <br />
-    <canvas id="canvas" width="1000" height="600"></canvas>
+    <canvas id="canvas" width="1000" height="1000"></canvas>
 
     <script>
         let isAnimating = false;
@@ -98,7 +98,7 @@
         const canvas = document.getElementById('canvas');
         const context = canvas.getContext('2d');
 
-        // 設定不同層的顏色(4種色系)
+        // 設定不同層的顏色(5種色系)
         function colorful(n) {
             switch (n % 5) {
                 case 1:
@@ -115,53 +115,43 @@
         }
 
         // 遞迴繪製樹狀圖
-        async function drawTree(n, x, y, level, arr) {
+        async function drawTree(n, x, y, level, arr, text) {
             if (level === 0) {
                 return;
             }
 
-            let text = arr[level] || 0;
 
+            // 如果沒有指定文字，則預設為空字串
+            let num = arr[level] || '';
 
             context.fillStyle = colorful(level); // 保持原有顏色
             context.beginPath();
-            context.arc(x, y, 20, 0, Math.PI * 2);
+            context.arc(x, y, 40, 0, Math.PI * 2);
             context.fill();
 
+
             // 繪製文字
-            context.font = "20px Arial";
+            context.font = "18px Arial";
             context.fillStyle = "white";
             context.textAlign = "center";
             context.textBaseline = "middle";
-            context.fillText(text, x, y);
-
+            context.fillText(text + "=" + num, x, y);
 
 
             if (level > 1) {
                 // 計算下一層節點的位置
-                const offsetX = 45;
-                const offsetY = 60;
+                const offsetX = 55;
+                const offsetY = 70;
                 const newX1 = x - offsetX; // 左邊
                 const newX2 = x + offsetX; // 右邊
                 const newY = y + offsetY;
 
                 // 繪製左子樹
-                drawTree(n, newX1, newY, level - 1, arr);
+                drawTree(n, newX1, newY, level - 1, arr, `f(${level - 1})`);
 
                 // 繪製右子樹
-                drawTree(n, newX2, newY, level - 2, arr);
+                drawTree(n, newX2, newY, level - 2, arr, `f(${level - 2})`);
 
-                // // 先繪製左連接線
-                // context.beginPath();
-                // context.moveTo(x, y + 15);
-                // context.lineTo(newX1, newY - 15);
-                // context.stroke();
-
-                // // 右
-                // context.beginPath();
-                // context.moveTo(x, y + 15);
-                // context.lineTo(newX2, newY - 15);
-                // context.stroke();
             }
         }
 
@@ -172,35 +162,28 @@
 
         // 遞迴計算費波那契數列
         async function fibonacci(n, arr) {
-             // 等待一段時間再進行繪製節點
-             await sleep(speedSlider.value*1000);
-
+            // 等待一段時間再進行繪製節點
+            await sleep(speedSlider.value * 1000);
+            orderDiv.innerText = `n = ${n}`;
             if (n <= 0) {
-                orderDiv.innerText += `||n = ${n}`;
                 return 0;
             } else if (n === 1) {
-
                 arrDiv.innerText = arr.slice(1, n + 1).join(", ");
-                orderDiv.innerText += `||n = ${n}`;
-
                 // 繪製樹狀圖
-                await drawTree(n, canvas.width / 2, 50, n, arr);
+                await drawTree(n, canvas.width / 2, 50, n, arr, `f(${n})`);
                 return 1;
             } else {
-               
                 const prev = await fibonacci(n - 1, arr);
                 const curr = await fibonacci(n - 2, arr);
-                // const prev = 0;
-                proDiv.innerText+=`||(n-1)prev:${prev}+(n-2)curr:${curr}`;
-                orderDiv.innerText += `--n = ${n}`;
+                proDiv.innerText = `prev(n-1):${prev}+curr(n-2):${curr}`;
+
                 arr[n] = prev + curr;
 
                 // 更新畫面
                 arrDiv.innerText = arr.slice(1, n + 1).join(", ");
-                
-                // 繪製樹狀圖
-                await drawTree(n, canvas.width / 2, 50, n, arr);
 
+                // 繪製樹狀圖
+                await drawTree(n, canvas.width / 2, 50, n, arr, `f(${n})`);
 
                 return arr[n];
             }
@@ -214,6 +197,9 @@
             if (isNaN(n) || n < 0) {
                 alert("請輸入大於等於 0 的數字");
                 return;
+            } else if (isNaN(speedSlider.value) || speedSlider.value < 0) {
+
+                return speedSlider.value = 0;
             }
 
 
